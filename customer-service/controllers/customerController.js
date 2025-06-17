@@ -1,76 +1,67 @@
 const Customer = require('../models/Customer');
-const generateToken = require('../utils/generateToken');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
-// @desc    Register new customer
-// @route   POST /api/customers/register
-// @access  Public
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+};
+
+// POST /api/customers/register
 const registerCustomer = async (req, res) => {
   const { name, email, password } = req.body;
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'Please provide all fields' });
+  }
 
-  try {
-    const customerExists = await Customer.findOne({ email });
-    if (customerExists) {
-      return res.status(400).json({ message: 'Customer already exists' });
-    }
+  const existingCustomer = await Customer.findOne({ email });
+  if (existingCustomer) {
+    return res.status(400).json({ message: 'Customer already exists' });
+  }
 
-    const customer = await Customer.create({ name, email, password });
+  const hashedPassword = await bcrypt.hash(password, 10);
 
+  const customer = await Customer.create({ name, email, password: hashedPassword });
+  if (customer) {
     res.status(201).json({
       _id: customer._id,
       name: customer.name,
       email: customer.email,
       token: generateToken(customer._id),
+      createdAt: customer.createdAt,
+      updatedAt: customer.updatedAt
     });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+  } else {
+    res.status(400).json({ message: 'Invalid customer data' });
   }
 };
 
-// @desc    Authenticate customer & get token
-// @route   POST /api/customers/login
-// @access  Public
-const authCustomer = async (req, res) => {
+// POST /api/customers/login
+const loginCustomer = async (req, res) => {
   const { email, password } = req.body;
 
-  try {
-    const customer = await Customer.findOne({ email });
-    if (customer && (await customer.matchPassword(password))) {
-      res.json({
-        _id: customer._id,
-        name: customer.name,
-        email: customer.email,
-        token: generateToken(customer._id),
-      });
-    } else {
-      res.status(401).json({ message: 'Invalid email or password' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+  const customer = await Customer.findOne({ email });
+  if (customer && (await bcrypt.compare(password, customer.password))) {
+    res.json({
+      _id: customer._id,
+      name: customer.name,
+      email: customer.email,
+      token: generateToken(customer._id),
+      createdAt: customer.createdAt,
+      updatedAt: customer.updatedAt
+    });
+  } else {
+    res.status(401).json({ message: 'Invalid email or password' });
   }
 };
 
-// @desc    Get customer profile
-// @route   GET /api/customers/profile
-// @access  Private
+// GET /api/customers/profile
 const getCustomerProfile = async (req, res) => {
-  try {
-    const customer = req.customer;
-    if (customer) {
-      res.json({
-        _id: customer._id,
-        name: customer.name,
-        email: customer.email,
-      });
-    } else {
-      res.status(404).json({ message: 'Customer not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+  const customer = await Customer.findById(req.user._id).select('-password');
+  if (customer) {
+    res.json(customer);
+  } else {
+    res.status(404).json({ message: 'Customer not found' });
   }
 };
 
-module.exports = {
-  registerCustomer,
-  authCustomer,
-  getCustomerProfile,
-};
+module.exports = { registerCustomer, loginCustomer, getCustomerProfile };
