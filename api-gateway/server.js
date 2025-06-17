@@ -2,24 +2,25 @@ const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-const auditRoutes = require('./routes/auditRoutes');
 
 dotenv.config();
-connectDB();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
 
-// Proxy routes to microservices
-app.use('/api/customers', createProxyMiddleware({ target: process.env.CUSTOMER_SERVICE_URL, changeOrigin: true }));
-app.use('/api/products', createProxyMiddleware({ target: process.env.PRODUCT_SERVICE_URL, changeOrigin: true }));
-app.use('/api/agreements', createProxyMiddleware({ target: process.env.AGREEMENT_SERVICE_URL, changeOrigin: true }));
-app.use('/api/orders', createProxyMiddleware({ target: process.env.ORDER_SERVICE_URL, changeOrigin: true }));
+const options = {
+  changeOrigin: true,
+  timeout: 60000,
+  proxyTimeout: 60000
+};
 
-// Audit log endpoints (handled by API Gateway itself)
-app.use('/api/audit-logs', auditRoutes);
+app.use(
+  '/api/customers',
+  createProxyMiddleware({
+    ...options,
+    target: process.env.CUSTOMER_SERVICE_URL
+  })
+);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });

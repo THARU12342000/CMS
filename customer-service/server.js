@@ -10,7 +10,7 @@ connectDB();
 const app = express();
 
 app.use(cors());
-app.use(express.json()); // <---- THIS LINE IS CRUCIAL
+app.use(express.json());
 
 app.use('/api/customers', customerRoutes);
 

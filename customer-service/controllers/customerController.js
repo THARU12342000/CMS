@@ -6,39 +6,29 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 };
 
-// POST /api/customers/register
 const registerCustomer = async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ message: 'Please provide all fields' });
   }
-
   const existingCustomer = await Customer.findOne({ email });
   if (existingCustomer) {
     return res.status(400).json({ message: 'Customer already exists' });
   }
-
   const hashedPassword = await bcrypt.hash(password, 10);
-
   const customer = await Customer.create({ name, email, password: hashedPassword });
-  if (customer) {
-    res.status(201).json({
-      _id: customer._id,
-      name: customer.name,
-      email: customer.email,
-      token: generateToken(customer._id),
-      createdAt: customer.createdAt,
-      updatedAt: customer.updatedAt
-    });
-  } else {
-    res.status(400).json({ message: 'Invalid customer data' });
-  }
+  res.status(201).json({
+    _id: customer._id,
+    name: customer.name,
+    email: customer.email,
+    token: generateToken(customer._id),
+    createdAt: customer.createdAt,
+    updatedAt: customer.updatedAt
+  });
 };
 
-// POST /api/customers/login
 const loginCustomer = async (req, res) => {
   const { email, password } = req.body;
-
   const customer = await Customer.findOne({ email });
   if (customer && (await bcrypt.compare(password, customer.password))) {
     res.json({
@@ -54,7 +44,6 @@ const loginCustomer = async (req, res) => {
   }
 };
 
-// GET /api/customers/profile
 const getCustomerProfile = async (req, res) => {
   const customer = await Customer.findById(req.user._id).select('-password');
   if (customer) {
@@ -64,4 +53,8 @@ const getCustomerProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerCustomer, loginCustomer, getCustomerProfile };
+module.exports = {
+  registerCustomer,
+  loginCustomer,
+  getCustomerProfile
+};
