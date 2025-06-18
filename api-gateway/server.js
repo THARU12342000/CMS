@@ -16,6 +16,38 @@ app.use(
   })
 );
 
+app.use(
+  '/api/products',
+  createProxyMiddleware({
+    target: process.env.PRODUCT_SERVICE_URL,
+    changeOrigin: true,
+  })
+);
+
+app.use(
+  '/api/agreements',
+  createProxyMiddleware({
+    target: process.env.AGREEMENT_SERVICE_URL,
+    changeOrigin: true,
+  })
+);
+
+app.use(
+  '/api/orders',
+  createProxyMiddleware({
+    target: process.env.ORDER_SERVICE_URL,
+    changeOrigin: true,
+  })
+);
+
+app.use(
+  '/api/audit',
+  createProxyMiddleware({
+    target: process.env.AUDIT_SERVICE_URL,
+    changeOrigin: true,
+  })
+);
+
 app.use((req, res) => {
   res.status(404).json({ message: 'API Gateway: Route not found' });
 });

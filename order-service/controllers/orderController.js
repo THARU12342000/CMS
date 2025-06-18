@@ -7,6 +7,13 @@ const placeOrder = async (req, res) => {
   const { productId, quantity } = req.body;
 
   try {
+    // Check if product exists
+    try {
+      await axios.get(`${process.env.PRODUCT_SERVICE_URL}/api/products/${productId}`);
+    } catch (error) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
     // Check consent from Agreement Service
     const agreementServiceResponse = await axios.get(
       `${process.env.AGREEMENT_SERVICE_URL}/api/agreements?consentType=marketing`,
@@ -20,7 +27,7 @@ const placeOrder = async (req, res) => {
     const consents = agreementServiceResponse.data;
     // Find a granted consent for the required type
     const hasConsent = consents.some(
-      consent => consent.status === 'granted'
+      (consent) => consent.status === 'granted'
     );
 
     if (!hasConsent) {
@@ -30,7 +37,7 @@ const placeOrder = async (req, res) => {
     const order = await Order.create({
       customer: customerId,
       product: productId,
-      quantity
+      quantity,
     });
 
     res.status(201).json(order);
