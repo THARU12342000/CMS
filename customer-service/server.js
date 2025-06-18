@@ -15,7 +15,7 @@ app.use(express.json());
 app.use('/api/customers', customerRoutes);
 
 app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
+  res.status(404).json({ message: 'Route not found in customer service' });
 });
 
 const PORT = process.env.PORT || 5004;

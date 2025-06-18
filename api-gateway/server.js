@@ -8,22 +8,16 @@ dotenv.config();
 const app = express();
 app.use(cors());
 
-const options = {
-  changeOrigin: true,
-  timeout: 60000,
-  proxyTimeout: 60000
-};
-
 app.use(
   '/api/customers',
   createProxyMiddleware({
-    ...options,
-    target: process.env.CUSTOMER_SERVICE_URL
+    target: process.env.CUSTOMER_SERVICE_URL,
+    changeOrigin: true
   })
 );
 
 app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
+  res.status(404).json({ message: 'API Gateway: Route not found' });
 });
 
 const PORT = process.env.PORT || 5000;
