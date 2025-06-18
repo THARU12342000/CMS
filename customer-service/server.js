@@ -12,7 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/customers', customerRoutes);
+app.use('/', customerRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found in customer service' });
