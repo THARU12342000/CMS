@@ -9,18 +9,22 @@ const app = express();
 app.use(cors());
 
 // Customer Service Proxy
-app.use('/api/customers', createProxyMiddleware({
-  target: process.env.CUSTOMER_SERVICE_URL,
-  changeOrigin: true,
-  logLevel: 'debug',
-  onProxyReq(proxyReq, req, res) {
-    console.log('Proxying request:', req.method, req.originalUrl);
-  },
-  onError(err, req, res) {
-    console.error('Proxy error:', err);
-    res.status(500).json({ message: 'Proxy error' });
-  }
-}));
+app.use(
+  '/api/customers',
+  createProxyMiddleware({
+    target: process.env.CUSTOMER_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: { '^/api/customers': '' }, // <--- THIS IS THE MISSING PART
+    logLevel: 'debug',
+    onProxyReq(proxyReq, req, res) {
+      console.log('Proxying request:', req.method, req.originalUrl);
+    },
+    onError(err, req, res) {
+      console.error('Proxy error:', err);
+      res.status(500).json({ message: 'Proxy error' });
+    }
+  })
+);
 
 // Product Service Proxy
 app.use('/api/products', createProxyMiddleware({
