@@ -24,6 +24,22 @@ const createOrUpdateConsent = async (req, res) => {
     }
     res.status(200).json(consent);
   } catch (error) {
+    console.error('Error creating/updating consent:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// GET /api/agreements/marketing
+const getMarketingConsent = async (req, res) => {
+  try {
+    const consents = await Consent.find({ 
+      consentType: 'marketing',
+      status: 'granted',
+      validUntil: { $gt: new Date() }
+    });
+    res.json(consents);
+  } catch (error) {
+    console.error('Error fetching marketing consent:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -39,8 +55,9 @@ const getConsentByUser = async (req, res) => {
     const consents = await Consent.find(filter);
     res.json(consents);
   } catch (error) {
+    console.error('Error fetching user consents:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-module.exports = { createOrUpdateConsent, getConsentByUser };
+module.exports = { createOrUpdateConsent, getConsentByUser, getMarketingConsent };

@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
-const { createOrUpdateConsent, getConsentByUser } = require('../controllers/agreementController');
+const { createOrUpdateConsent, getConsentByUser, getMarketingConsent } = require('../controllers/agreementController');
 
-// Create or update consent
+// Create or update consent (requires auth)
 router.post('/', protect, createOrUpdateConsent);
 
-// Get all consents for current user (optionally filter by type)
+// Get marketing consent (public)
+router.get('/marketing', getMarketingConsent);
+
+// Get all consents for current user (requires auth)
 router.get('/', protect, getConsentByUser);
 
 module.exports = router;
