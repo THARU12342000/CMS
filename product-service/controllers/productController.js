@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 
-// GET /api/products
+// @desc    Get all products
+// @route   GET /api/products
 const getProducts = async (req, res) => {
   try {
     const products = await Product.find({});
@@ -10,6 +11,8 @@ const getProducts = async (req, res) => {
   }
 };
 
+// @desc    Get product by ID
+// @route   GET /api/products/:id
 const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
