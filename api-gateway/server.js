@@ -50,6 +50,11 @@ app.use('/api/audit', createProxyMiddleware({
   changeOrigin: true,
 }));
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Fallback route
 app.use((req, res) => {
   res.status(404).json({ message: 'API Gateway: Route not found' });

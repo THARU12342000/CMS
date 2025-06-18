@@ -1,8 +1,18 @@
 @echo off
-start "API Gateway" cmd /k "cd api-gateway && npm start"
-start "Customer Service" cmd /k "cd customer-service && npm start"
-start "Product Service" cmd /k "cd product-service && npm start"
-start "Agreement Service" cmd /k "cd agreement-service && npm start"
-start "Order Service" cmd /k "cd order-service && npm start"
-start "Audit Service" cmd /k "cd audit-service && npm start"
-start "Frontend" cmd /k "cd frontend && npm start"
+echo Starting all services...
+
+start cmd /k "cd api-gateway && npm start"
+timeout /t 5
+start cmd /k "cd customer-service && npm start"
+timeout /t 5
+start cmd /k "cd product-service && npm start"
+timeout /t 5
+start cmd /k "cd order-service && npm start"
+timeout /t 5
+start cmd /k "cd agreement-service && npm start"
+timeout /t 5
+start cmd /k "cd audit-service && npm start"
+timeout /t 5
+start cmd /k "cd frontend && npm start"
+
+echo All services started!

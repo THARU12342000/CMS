@@ -1,6 +1,7 @@
 const Customer = require('../models/Customer');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const axios = require('axios');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
@@ -17,6 +18,16 @@ const registerCustomer = async (req, res) => {
   }
   const hashedPassword = await bcrypt.hash(password, 10);
   const customer = await Customer.create({ name, email, password: hashedPassword });
+  // Log registration to audit service
+  try {
+    await axios.post(`${process.env.AUDIT_SERVICE_URL}/api/audit`, {
+      userId: customer._id,
+      action: 'register',
+      details: { email }
+    });
+  } catch (error) {
+    console.error('Audit logging failed:', error);
+  }
   res.status(201).json({
     _id: customer._id,
     name: customer.name,
@@ -31,6 +42,16 @@ const loginCustomer = async (req, res) => {
   const { email, password } = req.body;
   const customer = await Customer.findOne({ email });
   if (customer && (await bcrypt.compare(password, customer.password))) {
+    // Log login to audit service
+    try {
+      await axios.post(`${process.env.AUDIT_SERVICE_URL}/api/audit`, {
+        userId: customer._id,
+        action: 'login',
+        details: { email }
+      });
+    } catch (error) {
+      console.error('Audit logging failed:', error);
+    }
     res.json({
       _id: customer._id,
       name: customer.name,

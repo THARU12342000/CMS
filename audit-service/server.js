@@ -14,6 +14,11 @@ app.use(express.json());
 
 app.use('/api/audit', auditRoutes);
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });

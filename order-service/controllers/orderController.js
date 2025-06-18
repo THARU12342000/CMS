@@ -40,6 +40,17 @@ const placeOrder = async (req, res) => {
       quantity,
     });
 
+    // Log order placement to audit service
+    try {
+      await axios.post(`${process.env.AUDIT_SERVICE_URL}/api/audit`, {
+        userId: customerId,
+        action: 'place_order',
+        details: { productId, quantity }
+      });
+    } catch (error) {
+      console.error('Audit logging failed:', error);
+    }
+
     res.status(201).json(order);
   } catch (error) {
     if (error.response?.status === 404) {

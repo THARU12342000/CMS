@@ -15,6 +15,11 @@ app.use(express.json());
 // Mount routes under /api/customers (important!)
 app.use('/api/customers', customerRoutes);
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found in customer service' });
 });
