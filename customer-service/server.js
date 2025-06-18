@@ -12,7 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Fix is here
+// Mount routes under /api/customers (important!)
 app.use('/api/customers', customerRoutes);
 
 app.use((req, res) => {
